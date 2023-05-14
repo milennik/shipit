@@ -52,19 +52,20 @@ async fn poker() -> (StatusCode, String) {
         suit: Suit::Spade,
     };
     let flop_card3 = Card {
-        value: Value::Four,
+        value: Value::Ace,
         suit: Suit::Club,
     };
 
-    let _board = [flop_card1, flop_card2, flop_card3];
+    let board = vec![flop_card1, flop_card2, flop_card3];
 
-    let mut g = MonteCarloGame::new_with_hands(hands).expect("Should be able to create a game.");
+    let mut g =
+        MonteCarloGame::new_with_hands(hands, board).expect("Should be able to create a game.");
 
     let mut wins: [u64; 2] = [0, 0];
     for _ in 0..2_000_000 {
-        let r = g.simulate().expect("Should be able to simulate a hand.");
+        let r = g.simulate();
         g.reset();
-        wins[r.0] += 1
+        wins[r.0.ones().next().unwrap()] += 1
     }
 
     let w1 = wins[0] as f64;
