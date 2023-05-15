@@ -3,9 +3,12 @@ use axum::{
     routing::{get, post},
     Json, Router,
 };
-use rs_poker::core::{Hand, Suit, Value};
 use rs_poker::holdem::MonteCarloGame;
 use rs_poker::{self, core::Card};
+use rs_poker::{
+    arena::game_state::GameState,
+    core::{Hand, Suit, Value},
+};
 use serde::{Deserialize, Serialize};
 
 #[tokio::main]
@@ -15,6 +18,7 @@ async fn main() {
     let app = Router::new()
         .route("/", get(root))
         .route("/poker", get(poker))
+        .route("/hand", get(hand))
         .route("/users", post(create_user));
 
     let addr = format!("{}:{}", "0.0.0.0", "3000");
@@ -35,6 +39,15 @@ async fn create_user(Json(payload): Json<CreateUser>) -> (StatusCode, Json<User>
     };
 
     return (StatusCode::CREATED, Json(user));
+}
+
+async fn hand() -> (StatusCode, String) {
+    let stacks = vec![100, 4];
+    let mut game_state = GameState::new(stacks, 20, 10, 0);
+    game_state.advance_round().unwrap();
+
+    dbg!(game_state.clone());
+    return (StatusCode::OK, "hand completed.".to_string());
 }
 
 async fn poker() -> (StatusCode, String) {
@@ -78,7 +91,7 @@ async fn poker() -> (StatusCode, String) {
         .join(", ");
 
     println!("{}", wins_string);
-    return (StatusCode::CREATED, format!("{}", perc));
+    return (StatusCode::OK, format!("{}", perc));
 }
 
 #[derive(Deserialize)]
