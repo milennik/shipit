@@ -3,12 +3,12 @@ use axum::{
     routing::{get, post},
     Json, Router,
 };
-use rs_poker::holdem::MonteCarloGame;
 use rs_poker::{self, core::Card};
 use rs_poker::{
     arena::game_state::GameState,
     core::{Hand, Suit, Value},
 };
+use rs_poker::{arena::simulation::HoldemSimulation, holdem::MonteCarloGame};
 use serde::{Deserialize, Serialize};
 
 #[tokio::main]
@@ -43,10 +43,11 @@ async fn create_user(Json(payload): Json<CreateUser>) -> (StatusCode, Json<User>
 
 async fn hand() -> (StatusCode, String) {
     let stacks = vec![100, 4];
-    let mut game_state = GameState::new(stacks, 20, 10, 0);
-    game_state.advance_round().unwrap();
+    let game_state = GameState::new(stacks, 20, 10, 0);
+    let mut sim = HoldemSimulation::new(game_state);
+    sim.step();
 
-    dbg!(game_state.clone());
+    dbg!(sim.game_state.clone());
     return (StatusCode::OK, "hand completed.".to_string());
 }
 
