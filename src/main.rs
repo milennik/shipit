@@ -42,12 +42,15 @@ async fn create_user(Json(payload): Json<CreateUser>) -> (StatusCode, Json<User>
 }
 
 async fn hand() -> (StatusCode, String) {
-    let stacks = vec![100, 4];
+    let stacks = vec![100; 4];
     let game_state = GameState::new(stacks, 20, 10, 0);
     let mut sim = HoldemSimulation::new(game_state);
     sim.step();
 
+    assert_eq!(80, sim.game_state.stacks[2]);
+    assert_eq!(90, sim.game_state.stacks[1]);
     dbg!(sim.game_state.clone());
+
     return (StatusCode::OK, "hand completed.".to_string());
 }
 
